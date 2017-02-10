@@ -2,9 +2,16 @@ package com.example.use.joke;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Handler;
+import android.util.Log;
+import android.widget.Toast;
 
 
 public class DelayedMessageService extends IntentService {
+
+    public static final String EXTRA_MESSAGE = "message";
+    private Handler handler;
+    public static final int NOTIFICATION_ID = 5453;
 
     public DelayedMessageService() {
         super("DelayedMessageService");
@@ -12,7 +19,34 @@ public class DelayedMessageService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        synchronized (this){
+            try {
+                wait(10000);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+            String text = intent.getStringExtra(EXTRA_MESSAGE);
+            ShowText(text);
+        }
+    }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        handler = new Handler();
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void ShowText(final String text){
+        // log
+        Log.v("DelayedMessageService", "The message is: " + text);
+        //toast
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
+            }
+        });
+        //message
     }
 
 }
